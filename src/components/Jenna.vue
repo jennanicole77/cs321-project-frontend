@@ -21,7 +21,12 @@ export default {
 
       },
       test: function() {
-          this.meow = new Date();
+        let self = this;
+        fetch('http://localhost:8080/eth-price')
+        .then(response => response.json())
+        .then(data => {
+          self.meow = data.price
+        });
       }
   }
 }
