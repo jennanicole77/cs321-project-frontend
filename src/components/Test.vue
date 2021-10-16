@@ -8,19 +8,25 @@
         <button @click="test2">Click Me For current  profitablility per 100Mhs of ethereum</button>
         Data: {{currProfitability}}
       </div>
+       <div>
+        <multiselect v-model="value" :options="multiTest">hello</multiselect>
+      </div>
     </div>
 </template>
 
 <script>
+import Multiselect from 'vue-multiselect'
 export default {
   name: 'HelloWorld',
   props: {
     msg: String
   },
+  components: { Multiselect },
   data() {
     return {
         currPrice: null,
-        currProfitability: null
+        currProfitability: null,
+        options: null
     }
   },
   methods: {
@@ -42,11 +48,14 @@ export default {
         .then(data => {
           self.currProfitability = data.id
         });
+      },
+      multiTest: function() {
+        self.options = ['list', 'of', 'options']
       }
   }
 }
 </script>
 
-<style scoped>
 
+<style src="vue-multiselect/dist/vue-multiselect.min.css">
 </style>
