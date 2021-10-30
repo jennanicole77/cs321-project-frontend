@@ -1,16 +1,16 @@
 <template>
   <div id="app">
-    <test />
+    <ethereum-profitability />
   </div>
 </template>
 
 <script>
-import Test from './components/Test.vue'
+import EthereumProfitability from './components/EthereumProfitability.vue'
 
 export default {
   name: 'App',
   components: {
-    Test
+    EthereumProfitability
   }
 }
 </script>
