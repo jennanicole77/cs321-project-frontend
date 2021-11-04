@@ -1,6 +1,9 @@
 <template>
     <div>
       <h2>
+        <img class="img-thumbnail" alt="1000x1628" src="https://ethereum.org/static/6b935ac0e6194247347855dc3d328e83/34ca5/eth-diamond-black.png"
+          data-holder-rendered="true" style="width: 80px; height: 130px;">
+          <br>
         <label>Ethereum Calculator</label>
       </h2>
       <div>
@@ -47,17 +50,19 @@
           </div>
         </div> 
         <br>
-        <div class="buttons"> 
-          <button id="current-gpu" @click="displayGPUs">Display Current GPUs</button>
+      </div>  
+      <div class="buttons"> 
+        <button id="current-gpu" @click="displayGPUs">Display Current GPUs</button>
+      </div>
+      <div class="buttons"> 
+        <button type="button" class="btn btn-success" id="calculate" @click="calculate" :disabled=!compute>Calculate</button>
+      </div>
+      <template v-if="clickedCalculated && compute">
+        <div class="buttons">
+          <label class="eth-price">Calculated with 1 ETH = <span class="bold">${{currPrice}}</span> and profitablility per 100Mhs = <span class="bold">${{currProfitability}}</span></label>
         </div>
-        <div class="buttons"> 
-          <button id="calculate" @click="calculate" :disabled=!compute>Calculate</button>
-        </div>
-        <template v-if="clickedCalculated && compute">
-          <div class="buttons">
-            <label class="eth-price">Calculated with 1 ETH = <span class="bold">${{currPrice}}</span> and profitablility per 100Mhs = <span class="bold">${{currProfitability}}</span></label>
-          </div>
-          <br>
+        <br>
+        <div class="grid"> 
           <div> 
             <label>You currently Own:&nbsp;</label>
             <span>{{currentlyOwn}}</span> 
@@ -88,8 +93,8 @@
           <div>
             <label id="calculationNote"><span>*</span>These calculations have been adjusted for Federal Taxes and Power Consumption.</label>
           </div>
-        </template>
-      </div>
+        </div>  
+      </template>
     </div>
 </template>
 
@@ -192,11 +197,12 @@ export default {
 
   .grid {
     text-align: left;
+    margin-left: 275px;
   }
   
   .textFields {
     float: right;
-    margin-right: 100px;
+    margin-right: 275px;
   }
 
   #GPU-Name {
@@ -213,6 +219,7 @@ export default {
 
   .gpus-buttons {
      float: right;
+     margin-right: 248px;
   }
 
   .space, .sessions {
