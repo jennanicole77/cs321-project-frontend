@@ -237,4 +237,6 @@ export default {
   .bold {
     font-weight: 500;
   }
+
+  @import'~bootstrap/dist/css/bootstrap.css'
 </style>
