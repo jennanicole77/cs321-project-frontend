@@ -54,8 +54,8 @@
       <div class="buttons"> 
         <button id="current-gpu" @click="displayGPUs">Display Current GPUs</button>
       </div>
-      <div class="buttons"> 
-        <button type="button" class="btn btn-success" id="calculate" @click="calculate" :disabled=!compute>Calculate</button>
+      <div class="buttons">
+        <button type="button" class="btn btn-secondary" id="calculate" @click="calculate" :disabled=!compute>Calculate</button>
       </div>
       <template v-if="clickedCalculated && compute">
         <div class="buttons">
@@ -207,6 +207,10 @@ export default {
 
   #GPU-Name {
     margin-right: 10px;
+  }
+
+  #calculate{
+    color: white;
   }
 
   #current-gpu {
