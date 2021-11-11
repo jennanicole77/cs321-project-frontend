@@ -39,7 +39,7 @@
         <br>
         <div> 
           <label>Choose a GPU</label>
-          <select id="GPU-Name" name="test">
+          <select id="GPU-Name" v-model="gpuName">
             <option v-for="gpu in gpus" :key="gpu">{{gpu}}</option>
           </select>
           <label> Quantity </label>
@@ -53,6 +53,11 @@
       </div>  
       <div class="buttons"> 
         <button id="current-gpu" @click="displayGPUs">Display Current GPUs</button>
+        <template v-if="display">
+          <div  v-for="currGpu in gpusList" :key="currGpu.name" id="GPU-List">
+            <span>Name: {{currGpu.name}} Hash: {{currGpu.hash}} Power: {{currGpu.power}} Quantity: {{currGpu.quantity}}</span>
+          </div>
+        </template>
       </div>
       <div class="buttons">
         <button type="button" class="btn btn-secondary" id="calculate" @click="calculate" :disabled=!compute>Calculate</button>
@@ -65,29 +70,30 @@
         <div class="grid"> 
           <div> 
             <label>You currently Own:&nbsp;</label>
-            <span>{{currentlyOwn}}</span> 
+            <span>{{currentlyMined}} ETH.</span>
           </div>
           <div> 
-            <label>Your total system price was: </label>
-            <span>${{systemPrice}}</span> 
+            <label>Your total system price was:&nbsp;</label>
+            <span>${{rigPrice}}.</span> 
           </div>
           <div> 
-            <label>You need to mine:  </label>
-            <span>{{amountToMine}}</span> 
+            <label>You need to mine:&nbsp;</label>
+            <span>${{amountToMine}} to reach ROI.</span> 
           </div>
           <div> 
-            <label>Your current hashrate is: </label>
-            <span>{{currentHashrate}}</span> 
+            <label>Your current hashrate is:&nbsp;</label>
+            <span>{{currentHashrate}} Mh/s.</span> 
           </div>
           <div> 
-            <label>Your estimated Power Consumtion is: </label>
-            <span>${{powerConsumption}}</span> 
+            <label>Revenue per day is estimated at:&nbsp;</label>
+            <span>${{revenuePerDay}}</span> 
           </div>
           <div> 
-            <label>Profit per day is estimated at ${{profitPerDay}}.</label>
+            <label>Profit per day is estimated at:&nbsp;</label>
+            <span>${{profitPerDay}}.</span>
           </div>
           <div> 
-            <label>At current prices your Rig will be paid of in {{daysTillPaidOff}} days on {{datePaidOff}}</label>
+            <label>At current prices your Rig will be paid of in {{daysTillPaidOff}} on {{datePaidOff}}</label>
           </div>
           <br>
           <div>
@@ -106,6 +112,7 @@ export default {
   data() {
     
     return {
+      user: null,
       currentlyMined: null,
       rigPrice: null,
       taxBracket: null,
@@ -114,15 +121,18 @@ export default {
       systemPrice: null,
       amountToMine: null,
       currentHashrate: null,
-      powerConsumption: null,
+      revenuePerDay: null,
       profitPerDay: null,
       daysTillPaidOff: null,
       datePaidOff: null,
-      gpus: [1,2,3,4],
+      gpus: null,
       gpuQuantity: null,
+      gpuName: null,
+      gpusList: null,
       clickedCalculated: false,
       currPrice: null,
-      currProfitability: null
+      currProfitability: null,
+      display: false
     }
   },
   
@@ -135,34 +145,184 @@ export default {
   created: function() {
     this.getEthereumPrice();
     this.getProfitability();
+    
+    let self = this;
+      fetch('http://localhost:8080/user')
+      .then(response => response.json())
+      .then(data => {
+        let myData = JSON.parse(data)
+        self.user = myData;
+        self.gpus = self.user.All_Gpu_Dict;
+      });
   },
 
   methods: {
     saveSession: function() {
+      let save = ""
 
+      //getting a saved session
+      fetch('http://localhost:8080/save')
+      .then(response => response.json())
+      .then(data => {
+        console.log("save", save)
+        save = data
+        console.log(save)
+        let link = document.createElement('a');
+        link.download = 'ethereum.json';
+        let blob = new Blob([save], {type: 'text/plain'});
+        link.href = window.URL.createObjectURL(blob);
+        link.click(); 
+      });
     },
 
     loadSession: function() {
-
+        //send in a file 
+        //returns a new user class
+        //update user text fields and reset calculation
     },
 
     displayGPUs: function() {
-
+      if(this.display)
+        this.display = false;
+      else
+        this.display = true;
     },
 
     addGPU: function() {
-      //everytime added or removed update gpus for multiselect
+      this.display = false;
 
+      //removing gpu 
+      let self = this;
+      fetch('http://localhost:8080/gpu-update?name=' + self.gpuName, {
+        method : 'PUT'
+      })
+      .then(response => response.json())
+      .then(data => {
+        self.gpuName = data;
+
+        fetch('http://localhost:8080/add-gpu?quantity=' + self.gpuQuantity, {
+          method : 'PUT'
+        })
+        .then(response => response.json())
+        .then(data => {
+          self.gpusList = [];
+          JSON.parse(data).forEach(function(gpu) {
+            self.gpusList.push({name: gpu[1], hash: gpu[3], power: gpu[5], quantity: gpu[7]})
+          });
+        });
+      }); 
     },
 
     removeGPU: function() {
+      this.display = false;
 
+      //removing gpu 
+      let self = this;
+      fetch('http://localhost:8080/gpu-update?name=' + self.gpuName, {
+        method : 'PUT'
+      })
+      .then(response => response.json())
+      .then(data => {
+        self.gpuName = data;
+
+        fetch('http://localhost:8080/remove-gpu?quantity=' + self.gpuQuantity, {
+          method : 'PUT'
+        })
+        .then(response => response.json())
+        .then(data => {
+          self.gpusList = [];
+          JSON.parse(data).forEach(function(gpu) {
+            self.gpusList.push({name: gpu[1], hash: gpu[3], power: gpu[5], quantity: gpu[7]})
+          });
+        });
+      }); 
     },
 
     calculate: function() {
       this.clickedCalculated = true;
       this.getEthereumPrice();
       this.getProfitability();
+
+      let self = this;
+      //setting amount mined
+      fetch('http://localhost:8080/amount-mined?mined=' + self.currentlyMined, {
+        method : 'PUT',
+      })
+      .then(response => response.json())
+      .then(data => {
+        self.user.ethereum = data;
+        self.currentlyOwn = data;
+      });
+
+      //setting rig price
+      fetch('http://localhost:8080/rig?rig=' + self.rigPrice, {
+        method : 'PUT',
+      })
+      .then(response => response.json())
+      .then(data => {
+        self.user.total_cost = data;
+      });
+      
+      //setting tax rate
+      fetch('http://localhost:8080/tax?tax=' + self.taxBracket, {
+        method : 'PUT',
+      })
+      .then(response => response.json())
+      .then(data => {
+        self.user.tax_rate = data;
+      });
+
+      //setting power
+      fetch('http://localhost:8080/power?power=' + self.powerRate, {
+        method : 'PUT',
+      })
+      .then(response => response.json())
+      .then(data => {
+        self.user.power_rate = data;
+      });
+
+      //getting amount to mine
+      fetch('http://localhost:8080/mine')
+      .then(response => response.json())
+      .then(data => {
+        let myData = JSON.parse(data)
+        self.amountToMine = myData.toFixed(2);
+      });
+
+      //getting current hash rate
+      fetch('http://localhost:8080/hashrate')
+      .then(response => response.json())
+      .then(data => {
+        let myData = JSON.parse(data)
+        self.currentHashrate = myData;
+      });
+
+      //getting revenue per day
+      fetch('http://localhost:8080/revenue')
+      .then(response => response.json())
+      .then(data => {
+        let myData = JSON.parse(data)
+        self.revenuePerDay = myData.toFixed(2);
+      });
+
+      //getting profit per day
+      fetch('http://localhost:8080/profit')
+      .then(response => response.json())
+      .then(data => {
+        let myData = JSON.parse(data)
+        self.profitPerDay = myData.toFixed(2);
+      });
+
+      //getting days till paid off
+      fetch('http://localhost:8080/days')
+      .then(response => response.json())
+      .then(data => {
+        let myData = JSON.parse(data);
+        self.daysTillPaidOff = myData;
+      });
+
+      this.datePaidOff = 0;
+      
     },
   
     reset: function() {
