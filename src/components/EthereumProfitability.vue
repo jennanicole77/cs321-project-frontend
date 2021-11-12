@@ -93,7 +93,7 @@
             <span>${{profitPerDay}}.</span>
           </div>
           <div> 
-            <label>At current prices your Rig will be paid of in {{daysTillPaidOff}} on {{datePaidOff}}</label>
+            <label>At current prices your Rig will be paid off in {{daysTillPaidOff}}</label>
           </div>
           <br>
           <div>
