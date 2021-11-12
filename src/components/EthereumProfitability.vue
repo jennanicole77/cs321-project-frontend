@@ -70,7 +70,7 @@
         <div class="grid"> 
           <div> 
             <label>You currently Own:&nbsp;</label>
-            <span>{{currentlyMined}} ETH.</span>
+            <span>${{currentlyMined}}.</span>
           </div>
           <div> 
             <label>Your total system price was:&nbsp;</label>
