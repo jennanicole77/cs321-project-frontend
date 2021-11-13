@@ -62,7 +62,11 @@
       <div class="buttons">
         <button type="button" class="btn btn-secondary" id="calculate" @click="calculate" :disabled=!compute>Calculate</button>
       </div>
-      <template v-if="clickedCalculated && compute">
+      <br>
+      <div v-if="!complete && clickedCalculated && compute" class="spinner-border text-secondary" role="status">
+        <span class="sr-only">Loading...</span>
+      </div>
+      <template v-if="clickedCalculated && compute && complete">
         <div class="buttons">
           <label class="eth-price">Calculated with 1 ETH = <span class="bold">${{currPrice}}</span> and profitablility per 100Mhs = <span class="bold">${{currProfitability}}</span></label>
         </div>
@@ -124,7 +128,6 @@ export default {
       revenuePerDay: null,
       profitPerDay: null,
       daysTillPaidOff: null,
-      datePaidOff: null,
       gpus: null,
       gpuQuantity: null,
       gpuName: null,
@@ -139,7 +142,12 @@ export default {
   computed: {
     compute() {
       return this.currentlyMined && this.rigPrice && this.taxBracket && this.powerRate;
-    }
+    },
+
+    complete() {
+      return this.amountToMine != null && this.currentHashrate != null && this.revenuePerDay != null
+        && this.profitPerDay != null && this.daysTillPaidOff != null;
+    },
   },
 
   created: function() {
@@ -157,6 +165,7 @@ export default {
   },
 
   methods: {
+
     saveSession: function() {
       let save = ""
 
@@ -164,9 +173,7 @@ export default {
       fetch('http://localhost:8080/save')
       .then(response => response.json())
       .then(data => {
-        console.log("save", save)
         save = data
-        console.log(save)
         let link = document.createElement('a');
         link.download = 'ethereum.json';
         let blob = new Blob([save], {type: 'text/plain'});
@@ -239,6 +246,11 @@ export default {
     },
 
     calculate: function() {
+       this.amountToMine = null;
+      this.currentHashrate = null;
+      this.revenuePerDay = null;
+      this.profitPerDay = null;
+      this.daysTillPaidOff = null;
       this.clickedCalculated = true;
       this.getEthereumPrice();
       this.getProfitability();
@@ -251,82 +263,84 @@ export default {
       .then(response => response.json())
       .then(data => {
         self.user.ethereum = data;
-        self.currentlyOwn = data;
-      });
+        self.currentlyOwn = data
 
-      //setting rig price
-      fetch('http://localhost:8080/rig?rig=' + self.rigPrice, {
-        method : 'PUT',
-      })
-      .then(response => response.json())
-      .then(data => {
-        self.user.total_cost = data;
-      });
-      
-      //setting tax rate
-      fetch('http://localhost:8080/tax?tax=' + self.taxBracket, {
-        method : 'PUT',
-      })
-      .then(response => response.json())
-      .then(data => {
-        self.user.tax_rate = data;
-      });
+        //setting rig price
+        fetch('http://localhost:8080/rig?rig=' + self.rigPrice, {
+          method : 'PUT',
+        })
+        .then(response => response.json())
+        .then(data => {
+          self.user.total_cost = data;
 
-      //setting power
-      fetch('http://localhost:8080/power?power=' + self.powerRate, {
-        method : 'PUT',
-      })
-      .then(response => response.json())
-      .then(data => {
-        self.user.power_rate = data;
-      });
+          //setting tax rate
+          fetch('http://localhost:8080/tax?tax=' + self.taxBracket, {
+            method : 'PUT',
+          })
+          .then(response => response.json())
+          .then(data => {
+            self.user.tax_rate = data;
 
-      //getting amount to mine
-      fetch('http://localhost:8080/mine')
-      .then(response => response.json())
-      .then(data => {
-        let myData = JSON.parse(data)
-        self.amountToMine = myData.toFixed(2);
-      });
+            //setting power
+            fetch('http://localhost:8080/power?power=' + self.powerRate, {
+              method : 'PUT',
+            })
+            .then(response => response.json())
+            .then(data => {
+              self.user.power_rate = data;
 
-      //getting current hash rate
-      fetch('http://localhost:8080/hashrate')
-      .then(response => response.json())
-      .then(data => {
-        let myData = JSON.parse(data)
-        self.currentHashrate = myData;
-      });
+              //getting amount to mine
+              fetch('http://localhost:8080/mine')
+              .then(response => response.json())
+              .then(data => {
+                let myData = JSON.parse(data)
+                self.amountToMine = myData.toFixed(2);
+              });
 
-      //getting revenue per day
-      fetch('http://localhost:8080/revenue')
-      .then(response => response.json())
-      .then(data => {
-        let myData = JSON.parse(data)
-        self.revenuePerDay = myData.toFixed(2);
-      });
+              //getting current hash rate
+              fetch('http://localhost:8080/hashrate')
+              .then(response => response.json())
+              .then(data => {
+                let myData = JSON.parse(data)
+                self.currentHashrate = myData;
+              });
 
-      //getting profit per day
-      fetch('http://localhost:8080/profit')
-      .then(response => response.json())
-      .then(data => {
-        let myData = JSON.parse(data)
-        self.profitPerDay = myData.toFixed(2);
-      });
+              //getting revenue per day
+              fetch('http://localhost:8080/revenue')
+              .then(response => response.json())
+              .then(data => {
+                let myData = JSON.parse(data)
+                self.revenuePerDay = myData.toFixed(2);
+              });
 
-      //getting days till paid off
-      fetch('http://localhost:8080/days')
-      .then(response => response.json())
-      .then(data => {
-        let myData = JSON.parse(data);
-        self.daysTillPaidOff = myData;
-      });
+              //getting profit per day
+              fetch('http://localhost:8080/profit')
+              .then(response => response.json())
+              .then(data => {
+                let myData = JSON.parse(data)
+                self.profitPerDay = myData.toFixed(2);
+              });
 
-      this.datePaidOff = 0;
-      
+              //getting days till paid off
+              fetch('http://localhost:8080/days')
+              .then(response => response.json())
+              .then(data => {
+                let myData = JSON.parse(data);
+                self.daysTillPaidOff = myData;
+              });
+            });
+          });
+        });
+      });
     },
   
     reset: function() {
       this.clickedCalculated = false;
+      this.amountToMine = null;
+      this.currentHashrate = null;
+      this.revenuePerDay = null;
+      this.profitPerDay = null;
+      this.daysTillPaidOff = null;
     },
 
     getEthereumPrice: function() {
