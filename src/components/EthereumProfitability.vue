@@ -7,8 +7,9 @@
         <label>Ethereum Calculator</label>
       </h2>
       <div>
-        <button class="sessions" @click="saveSession">Save Session</button>
-        <button class="sessions" @click="loadSession">Load Session</button>
+        <button class="btn btn-secondary sessions" @click="saveSession">Save Session</button>
+        <label class="btn btn-secondary sessions" for="upload">Load Session</label>
+        <input id="upload" type="file" class="custom-file-input" @change="loadSession" ref="fileInput">
       </div>
       <br>
       <div class="grid">  
@@ -45,14 +46,14 @@
           <label> Quantity </label>
           <input v-model="gpuQuantity" type="number"/>
           <div class="gpus-buttons"> 
-            <button class="space" @click="addGPU">Add GPU</button>
-            <button class="space" @click="removeGPU">Remove GPU</button>
+            <button class="btn btn-secondary space" @click="addGPU">Add GPU</button>
+            <button class="btn btn-secondary space" @click="removeGPU">Remove GPU</button>
           </div>
         </div> 
         <br>
       </div>  
       <div class="buttons"> 
-        <button id="current-gpu" @click="displayGPUs">Display Current GPUs</button>
+        <button class="btn btn-secondary" id="current-gpu" @click="displayGPUs">Display Current GPUs</button>
         <template v-if="display">
           <div  v-for="currGpu in gpusList" :key="currGpu.name" id="GPU-List">
             <span>Name: {{currGpu.name}} Hash: {{currGpu.hash}} Power: {{currGpu.power}} Quantity: {{currGpu.quantity}}</span>
@@ -116,6 +117,7 @@ export default {
   data() {
     
     return {
+      file: null,
       user: null,
       currentlyMined: null,
       rigPrice: null,
@@ -165,6 +167,44 @@ export default {
   },
 
   methods: {
+    loadSession(event) {      
+      let self = this;
+      const reader = new FileReader();
+
+      reader.readAsText(event.target.files[0]);
+
+      reader.onload = function() {
+        let result = JSON.parse(reader.result);
+        self.reset();
+        console.log("HI")
+        self.currentlyMined = result.ethereum;
+        self.rigPrice = result.total_cost;
+        self.taxBracket = result.tax_rate;
+        self.powerRate = result.power_rate;
+        self.gpusList = [];
+        result.user_gpu.forEach(function(gpu) {
+            self.gpusList.push({name: gpu[1], hash: gpu[3], power: gpu[5], quantity: gpu[7]})
+        });
+        fetch('http://localhost:8080/user')
+        .then(response => response.json())
+        .then(data => {
+          let myData = JSON.parse(data)
+          self.user = myData;
+          self.gpus = self.user.All_Gpu_Dict;
+          fetch('http://localhost:8080/load?load=' + btoa(reader.result), {
+              method : 'PUT',
+            })
+            .then(response => response.json())
+            .then(data => {
+              console.log(data)
+          });
+        });
+      };
+
+      reader.onerror = function() {
+        console.log(reader.error);
+      };
+    },
 
     saveSession: function() {
       let save = ""
@@ -180,12 +220,6 @@ export default {
         link.href = window.URL.createObjectURL(blob);
         link.click(); 
       });
-    },
-
-    loadSession: function() {
-        //send in a file 
-        //returns a new user class
-        //update user text fields and reset calculation
     },
 
     displayGPUs: function() {
@@ -246,7 +280,7 @@ export default {
     },
 
     calculate: function() {
-       this.amountToMine = null;
+      this.amountToMine = null;
       this.currentHashrate = null;
       this.revenuePerDay = null;
       this.profitPerDay = null;
@@ -341,6 +375,9 @@ export default {
       this.revenuePerDay = null;
       this.profitPerDay = null;
       this.daysTillPaidOff = null;
+      this.gpusList = null;
+      const input = this.$refs.fileInput;
+      input.value = null;
     },
 
     getEthereumPrice: function() {
@@ -402,6 +439,7 @@ export default {
 
   .space, .sessions {
     margin-left: 10px;
+    margin-bottom: 0px;
   }
 
   .buttons {
@@ -415,6 +453,8 @@ export default {
   .bold {
     font-weight: 500;
   }
+
+  
 
   @import'~bootstrap/dist/css/bootstrap.css'
 </style>
