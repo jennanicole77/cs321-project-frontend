@@ -157,7 +157,7 @@ export default {
     this.getProfitability();
     
     let self = this;
-      fetch('http://localhost:8080/user')
+      fetch('https://backend.saturnp15.com//user')
       .then(response => response.json())
       .then(data => {
         let myData = JSON.parse(data)
@@ -185,13 +185,13 @@ export default {
         result.user_gpu.forEach(function(gpu) {
             self.gpusList.push({name: gpu[1], hash: gpu[3], power: gpu[5], quantity: gpu[7]})
         });
-        fetch('http://localhost:8080/user')
+        fetch('https://backend.saturnp15.com//user')
         .then(response => response.json())
         .then(data => {
           let myData = JSON.parse(data)
           self.user = myData;
           self.gpus = self.user.All_Gpu_Dict;
-          fetch('http://localhost:8080/load?load=' + btoa(reader.result), {
+          fetch('https://backend.saturnp15.com//load?load=' + btoa(reader.result), {
               method : 'PUT',
             })
             .then(response => response.json())
@@ -210,7 +210,7 @@ export default {
       let save = ""
 
       //getting a saved session
-      fetch('http://localhost:8080/save')
+      fetch('https://backend.saturnp15.com//save')
       .then(response => response.json())
       .then(data => {
         save = data
@@ -234,14 +234,14 @@ export default {
 
       //removing gpu 
       let self = this;
-      fetch('http://localhost:8080/gpu-update?name=' + self.gpuName, {
+      fetch('https://backend.saturnp15.com//gpu-update?name=' + self.gpuName, {
         method : 'PUT'
       })
       .then(response => response.json())
       .then(data => {
         self.gpuName = data;
 
-        fetch('http://localhost:8080/add-gpu?quantity=' + self.gpuQuantity, {
+        fetch('https://backend.saturnp15.com//add-gpu?quantity=' + self.gpuQuantity, {
           method : 'PUT'
         })
         .then(response => response.json())
@@ -259,14 +259,14 @@ export default {
 
       //removing gpu 
       let self = this;
-      fetch('http://localhost:8080/gpu-update?name=' + self.gpuName, {
+      fetch('https://backend.saturnp15.com//gpu-update?name=' + self.gpuName, {
         method : 'PUT'
       })
       .then(response => response.json())
       .then(data => {
         self.gpuName = data;
 
-        fetch('http://localhost:8080/remove-gpu?quantity=' + self.gpuQuantity, {
+        fetch('https://backend.saturnp15.com//remove-gpu?quantity=' + self.gpuQuantity, {
           method : 'PUT'
         })
         .then(response => response.json())
@@ -291,7 +291,7 @@ export default {
 
       let self = this;
       //setting amount mined
-      fetch('http://localhost:8080/amount-mined?mined=' + self.currentlyMined, {
+      fetch('https://backend.saturnp15.com//amount-mined?mined=' + self.currentlyMined, {
         method : 'PUT',
       })
       .then(response => response.json())
@@ -300,7 +300,7 @@ export default {
         self.currentlyOwn = data
 
         //setting rig price
-        fetch('http://localhost:8080/rig?rig=' + self.rigPrice, {
+        fetch('https://backend.saturnp15.com//rig?rig=' + self.rigPrice, {
           method : 'PUT',
         })
         .then(response => response.json())
@@ -308,7 +308,7 @@ export default {
           self.user.total_cost = data;
 
           //setting tax rate
-          fetch('http://localhost:8080/tax?tax=' + self.taxBracket, {
+          fetch('https://backend.saturnp15.com//tax?tax=' + self.taxBracket, {
             method : 'PUT',
           })
           .then(response => response.json())
@@ -316,7 +316,7 @@ export default {
             self.user.tax_rate = data;
 
             //setting power
-            fetch('http://localhost:8080/power?power=' + self.powerRate, {
+            fetch('https://backend.saturnp15.com//power?power=' + self.powerRate, {
               method : 'PUT',
             })
             .then(response => response.json())
@@ -324,7 +324,7 @@ export default {
               self.user.power_rate = data;
 
               //getting amount to mine
-              fetch('http://localhost:8080/mine')
+              fetch('https://backend.saturnp15.com//mine')
               .then(response => response.json())
               .then(data => {
                 let myData = JSON.parse(data)
@@ -332,7 +332,7 @@ export default {
               });
 
               //getting current hash rate
-              fetch('http://localhost:8080/hashrate')
+              fetch('https://backend.saturnp15.com//hashrate')
               .then(response => response.json())
               .then(data => {
                 let myData = JSON.parse(data)
@@ -340,7 +340,7 @@ export default {
               });
 
               //getting revenue per day
-              fetch('http://localhost:8080/revenue')
+              fetch('https://backend.saturnp15.com//revenue')
               .then(response => response.json())
               .then(data => {
                 let myData = JSON.parse(data)
@@ -348,7 +348,7 @@ export default {
               });
 
               //getting profit per day
-              fetch('http://localhost:8080/profit')
+              fetch('https://backend.saturnp15.com//profit')
               .then(response => response.json())
               .then(data => {
                 let myData = JSON.parse(data)
@@ -356,7 +356,7 @@ export default {
               });
 
               //getting days till paid off
-              fetch('http://localhost:8080/days')
+              fetch('https://backend.saturnp15.com//days')
               .then(response => response.json())
               .then(data => {
                 let myData = JSON.parse(data);
@@ -382,7 +382,7 @@ export default {
 
     getEthereumPrice: function() {
       let self = this;
-      fetch('http://localhost:8080/eth-price')
+      fetch('https://backend.saturnp15.com//eth-price')
       .then(response => response.json())
       .then(data => {
         self.currPrice = data.price;
@@ -391,7 +391,7 @@ export default {
 
     getProfitability: function() {
       let self = this;
-      fetch('http://localhost:8080/profitability')
+      fetch('https://backend.saturnp15.com//profitability')
       .then(response => response.json())
       .then(data => {
         self.currProfitability = data.id;
